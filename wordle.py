@@ -73,26 +73,31 @@ def check(wordle, guess):
 
     # deconstruct wordle into letters
     wordle_list = list(wordle)
-    print(wordle_list)
 
-    for i in range(5):
-        if wordle[i] == guess[i]:
-            print(f'guess letter in wordle and in right place: {guess[i]}')
-            wordle_list.remove(guess[i])
-        elif wordle[i] != guess[i] and guess[i] not in wordle_list:
-            print(f'guess letter not in wordle: {guess[i]}')
-        else:
-            print(f'guess letter in wordle but wrong place: {guess[i]}')
-            wordle_list.remove(guess[i])
-
+    res = []
 
     # check for matching letters by iterating through string
-        # if matching, add that letter in green to output list
-        # else, add yellow or green letter to output list
+    for i in range(5):
+        print(wordle_list)
+        # if matching, add green letter to result list
+        if wordle[i] == guess[i]:
+            wordle_list.remove(guess[i])
+            res.append(GREEN + guess[i])
+        # if not matching and not in wordle list, add red letter to result list
+        elif wordle[i] != guess[i] and guess[i] not in wordle_list:
+            res.append(RED + guess[i])
+        # if not matching but in wordle list, add yellow letter to result list
+        else:
+            wordle_list.remove(guess[i])
+            res.append(YELLOW + guess[i])
+
+    # combine letters and print colored string
+    colored_str = ''.join(res)
+    print(colored_str)
 
     # return output list
+    return guess
 
-    pass  # enter your code and take out the pass statement
 
 def feedback(attempt):
     """
@@ -101,7 +106,7 @@ def feedback(attempt):
     :param attempt: (integer) number of attempts needed to guess
     :return: None
     """
-    print(f'Attempt {attempt}')
+    print(f'CORRECT')
 
 
 def prompt_guess():
@@ -112,7 +117,7 @@ def prompt_guess():
     """
     while True:
         guess = input('Please enter your 5 letter guess: ')
-        if guess.isalpha():
+        if guess.isalpha() and len(guess) == 5:
             if guess.isupper():
                 return guess
             elif guess.islower():
@@ -129,41 +134,38 @@ def play(wordle):
     # guesses within 6 attempts
     guesses_left = 6
 
-    # call the prompt_guess function to prompt the user for each attempt
     while guesses_left > 0:
+        attempt_num = 7 - guesses_left
+        print(DEFAULT + f'Attempt {attempt_num}')
+        # call the prompt_guess function to prompt the user for each attempt
         guess = prompt_guess()
-
-        # check for correct guess
-        if guess == wordle:
-            print('congrats dude')
 
         # call the check function to build the colored feedback string
         feedback_str = check(wordle, guess)
 
         # call the feedback function to print the final feedback if the user
         if feedback_str == wordle:
-            feedback(7 - guesses_left)
+            feedback(attempt_num)
+            return True
 
+        guesses_left -= 1
 
+    return False
 
 
 
 def main():
-    # 1. prompt the player for a filename
+    # prompt the player for a filename
     filename = input('Please enter the filename: ')
 
-    # 2. call choose_wordle and get a random mystery word in uppercase
-    #    from the file specified
+    # call choose_wordle and get a random mystery word in uppercase from the
+    # file specified
     wordle = choose_wordle(filename)
 
-    # 3. call play to give the user 6 tries
-    play(wordle)
-
-    # 4. if the user has not guessed the wordle, print the correct
-    #    answer
-    print(f'The correct answer is {wordle}')
-
-
+    # call play to give the user 6 tries
+    if not play('RIGHT'):
+        # if the user has not guessed the wordle, print the correct answer
+        print(f'The correct answer is {wordle}')
 
 
 if __name__ == '__main__':
