@@ -30,18 +30,21 @@ def choose_wordle(filename):
     """
     # Open file
     with open(filename) as file:
-        content = file.readlines()
+        # Split lines by spaces
+        content = [line.split() for line in file.readlines()]
 
         # Stores all possible wordles
         all_wordles = []
 
-        # Split lines by spaces, then add to wordle list if word is
-        # alphabetical and 5 letters long
+        # Add to wordle list if word is alphabetical and 5 letters long
         for line in content:
-            split_line = line.split()
-            for word in split_line:
+            for word in line:
+                word = word.strip(',".')
                 if word.isalpha() and len(word) == 5:
+                    # print('Accepted: ' + word)
                     all_wordles.append(word.upper())
+
+        # print(len(all_wordles))
 
         # Select a random 5-letter wordle from wordle list
         wordle = random.choice(all_wordles)
@@ -61,35 +64,29 @@ def check(wordle, guess):
     :param guess: (string) the user's guess in upper case
     :return: (string) a string of red, yellow or green uppercase letters
     """
-    # HINTS: create a working list of letters in the wordle
-    # go over the letters in the guess and check for green matches
-    # add the green matches to their correct position in an output list
-    # remove the green matches from the working list
-    # go over the letters in the guess again
-    # compare them to the letters in working list
-    # add yellow or red color and add them to their position in output
-    # list
-    # join the output list into a colored string
-
-    # deconstruct wordle into letters
+    # deconstruct wordle into list of characters
     wordle_list = list(wordle)
 
-    res = []
+    # instantiate result array with fixed size
+    res = [None] * 5
 
-    # check for matching letters by iterating through string
+    # check for matching letters in correct plac
     for i in range(5):
-        print(wordle_list)
         # if matching, add green letter to result list
         if wordle[i] == guess[i]:
-            wordle_list.remove(guess[i])
-            res.append(GREEN + guess[i])
+            wordle_list[i] = ''
+            res[i] = GREEN + guess[i]
+
+    # check for nonmatching and matching but wrong place letters
+    for i in range(5):
         # if not matching and not in wordle list, add red letter to result list
-        elif wordle[i] != guess[i] and guess[i] not in wordle_list:
-            res.append(RED + guess[i])
+        if wordle[i] != guess[i] and guess[i] not in wordle_list:
+            res[i] = RED + guess[i]
         # if not matching but in wordle list, add yellow letter to result list
-        else:
-            wordle_list.remove(guess[i])
-            res.append(YELLOW + guess[i])
+        if wordle[i] != guess[i] and guess[i] in wordle_list:
+            wordle_list[i] = ''
+            res[i] = YELLOW + guess[i]
+        # print(wordle_list)
 
     # combine letters and print colored string
     colored_str = ''.join(res)
@@ -106,7 +103,19 @@ def feedback(attempt):
     :param attempt: (integer) number of attempts needed to guess
     :return: None
     """
-    print(f'CORRECT')
+    match attempt:
+        case 1:
+            print('Genius!')
+        case 2:
+            print('Magnificent!')
+        case 3:
+            print('Impressive!')
+        case 4:
+            print('Splendid!')
+        case 5:
+            print('Great!')
+        case 6:
+            print('Phew!')
 
 
 def prompt_guess():
@@ -162,10 +171,12 @@ def main():
     # file specified
     wordle = choose_wordle(filename)
 
+    #print(wordle)
+
     # call play to give the user 6 tries
-    if not play('RIGHT'):
+    if not play(wordle):
         # if the user has not guessed the wordle, print the correct answer
-        print(f'The correct answer is {wordle}')
+        print(DEFAULT + f'The correct answer is {wordle}')
 
 
 if __name__ == '__main__':
